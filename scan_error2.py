@@ -6,15 +6,17 @@
 # todo: future: Use QWebEngineView to get <DIV> to work in the HTML, see https://doc.qt.io/qtforpython/PySide2/QtWebEngineWidgets/QWebEngineView.html
 
 from ballot_inspector import Ballot_inspector
-from ETP_util import fullpath_to_image
+from ETP_util import fullpath_to_image, subpath_to_image
 from etpconfig import Scanconfig
-from scanner_hardware import Batch_status
+from batch import Batch_status
 import GLB_globals
 import os
 from os.path import isfile
 from PyQt5 import uic
 from PyQt5.QtCore import QCoreApplication, QPoint
 from PyQt5.QtWidgets import QWidget, QApplication
+import re
+from shutil import copy2
 import sys
 
 GLB = GLB_globals.get()
@@ -32,13 +34,14 @@ class ScanError2(QWidget):
         self.resumePB.pressed.connect(self.resumePB_pressed)
         self.back1PB.pressed.connect(self.back1PB_pressed)
         self.forward1PB.pressed.connect(self.forward1PB_pressed)
+        GLB.signals.inspector_viewing.connect(self.inspector_viewing)
         # self.dbg_putative = 2             # set 0 when not debugging
                                             # todo: polishing: set all debug parameters in systematic way
         self.initial_front_path = None
         self.alternate_image = GLB.ROOT_DIR + 'res/img/img_not_available.jpg'
         self.initial_next_seq_num = None     # save this to find what to delete when resuming scanning
 
-    def invoke(self, front_page, back_page):
+    def show_ballot_insp(self, front_page, back_page):
         """Open the ballot inspector."""
 
         front_page = self.possible_sub(front_page)
@@ -90,7 +93,7 @@ class ScanError2(QWidget):
         bsb = GLB.batch_status
         bsb.dbg_conditional_trace(False, 'before backing up one sheet')
         if bsb.back_up_one_sheet():
-            self.invoke(bsb.front_path, bsb.back_path)
+            self.show_ballot_insp(bsb.front_path, bsb.back_path)
             bsb.dbg_conditional_trace(False, 'after backing up one sheet')
             self.ui_set_consistency()
             return
@@ -105,12 +108,47 @@ class ScanError2(QWidget):
 
         bsb = GLB.batch_status
         if bsb.forward_one_sheet():
-            self.invoke(bsb.front_path, bsb.back_path)
+            self.show_ballot_insp(bsb.front_path, bsb.back_path)
 
         bsb.dbg_conditional_trace(False, 'after moving forward one sheet')
         self.ui_set_consistency()
 
     def resumePB_pressed(self):
+        """Clean up files deemed invalid by operator during ballot inspection."""
+
+        bsb = GLB.batch_status
+        simulating = GLB.config['Scanning']['simulating']
+        spoiled_path = GLB.config['Election']['path_to_spoiled_images']
+        self.initial_front_path = None
+        if self.initial_next_seq_num > bsb.next_seq_num_in_batch:
+            deletions = range(bsb.next_seq_num_in_batch,
+                              self.initial_next_seq_num)
+
+            # first, copy files to spoiled directory
+            for d in deletions:
+                from_path = fullpath_to_image(d)
+                deduper = 0
+                _, fname = subpath_to_image(d)
+                to_path = f'{spoiled_path}/{fname}.jpg'
+                while os.path.isfile(to_path):
+                    assert deduper < 26, f"unable to move {from_path} to spoiled directory."
+                    x = chr(ord('a') + deduper)
+                    to_path = f'{spoiled_path}/{fname}{x}.jpg'
+                    deduper += 1
+
+                copy2(from_path, to_path)
+
+            # then, when not simulating, delete files from original directory
+            if not simulating:
+                assert False, "How to test this?"
+                for filenum in deletions:
+                    f = fullpath_to_image(filenum)
+                    assert isfile(f)
+                    os.remove(f)
+                    print(f'deleting file: {f}', file=sys.stderr)
+
+            GLB.db.delete_images(deletions)     # delete rows from database
+
         self.inspector_window.hide()
         GLB.transitioner.set_current_panel('scanning')
 
@@ -129,6 +167,17 @@ class ScanError2(QWidget):
             self.forward1PB.setEnabled(True)
         else:
             self.forward1PB.setEnabled(False)
+        # self.img_numLBL.setText('%06d' % bsb.curr_batch_num())
+
+    def inspector_viewing(self, s):
+        """Set the number being viewed.
+
+           s: string      the path to the image being viewed."""
+
+        snum = GLB.img_file_name_match.search(s)
+        self.img_numLBL.setText('%06d' % int(snum[1]))
+
+
 
     # ---------------------------  entry check  ---------------------------
 
@@ -141,36 +190,12 @@ class ScanError2(QWidget):
         self.ui_set_consistency()
         front = self.possible_sub(bsb.front_path)
         back = self.possible_sub(bsb.back_path)
-        self.invoke(front, back)
+        self.show_ballot_insp(front, back)
         return True
 
     # ---------------------------  exit check  ---------------------------
 
-    def exit_check(self, departureType='continue'):
-        """Test for consistency among Admin settings. Return True if the operation should continue.
-           e.g., no error or user response was "ignore"."""
-
-        bsb = GLB.batch_status
-        simulating = GLB.config['Scanning']['simulating']
-        self.initial_front_path = None
-        if self.initial_next_seq_num > bsb.next_seq_num_in_batch:
-            deletions = range(bsb.next_seq_num_in_batch,
-                              self.initial_next_seq_num)
-
-
-            if not simulating:
-                assert False, "How to test this?"
-                for filenum in deletions:
-                    f = fullpath_to_image(filenum)
-                    if isfile(f):
-
-                        os.remove(f)
-                        print(f'deleting file: {f}', file = sys.stderr)
-
-                    else:
-                        print(f'not a file: {f}', file = sys.stderr)
-
-            GLB.db.delete_images(deletions)
+    def exit_check(self):
         return True
 
 

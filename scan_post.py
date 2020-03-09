@@ -1,6 +1,5 @@
 
-'''Scanning panel: Mainpanals page after a batch has ended normally.
-'''
+"""Opererator panel after batch is complete."""
 from etpconfig import Scanconfig
 import GLB_globals
 from PyQt5 import uic
@@ -8,12 +7,7 @@ from PyQt5.QtCore import QCoreApplication
 from PyQt5.QtWidgets import QWidget, QApplication
 import sys
 
-# todo: polishing -- screen is uncentered, probably because the stack_widget is uncentered.
-
-# GLB = None       # magically gets redefined through GLB_globals
 GLB = GLB_globals.get()
-
-# todo: if time: Designer changes to make the three entry boxes the same size and smaller.
 
 class ScanPost(QWidget):
     """Panel for after a batch has finished successfully"""
@@ -22,10 +16,7 @@ class ScanPost(QWidget):
         super().__init__()
         self._ui(uicpath)
         self.exit_app = exit_app
-        self.doublesided = GLB.config['ballot']['doublesided']
-
-        # set signal connections AFTER initial values loaded
-        self.quitPB.clicked.connect(exit_app)  # todo: Jump to close-app screen
+        self.quitPB.clicked.connect(exit_app)
         self.newBatchPB.clicked.connect(self.newBatchPB_pressed)
 
     def _ui(self, uicpath):
@@ -58,28 +49,23 @@ class ScanPost(QWidget):
            WHICH MUST BE TRUE IN EVERY SCENARIO BECAUSE THE PREVIOUS PANEL
            WAS THE SCANNER RUNNING."""
 
-        # todo: the following should generalized as a method in etpconfig.py
-        election_batch = GLB.batch_status.elections_batch_num
-        election_batch_list = GLB.config['Scanning']['electionsbatches']\
-                .replace(' ', '').split('|')
-        if election_batch not in election_batch_list:
-            election_batch_list.append(election_batch)
-            GLB.config['Scanning']['electionsbatches'] = '|'.join(election_batch_list)
+        # todo: move this to the database
 
+        # add to list of previous batches
+        GLB.config.add_to_unique_list(GLB.batch_status.elections_batch_num,
+                                      'Scanning','electionsbatches')
         GLB.config.write()
 
         # initialize the UI
-        #
         self.batchresultsBRWS.setPlainText(self.report(GLB.batch_status))
         return True
 
     # validity checking before exiting the panel
 
-    def exit_check(self, departureType='continue'):
+    def exit_check(self):
         """Test for consistency among Admin settings. Return True if the operation should continue.
            e.g., no error or user response was "ignore"."""
 
-        # todo: Add this elections batch num to accumulated electionsbatches.
         return True
 
 

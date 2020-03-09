@@ -47,7 +47,7 @@ if __name__ == '__main__':
         db.connect('testing')
 
     else:
-        db = dbase.ETPdb(dbase.dbconfig)
+        db = dbase.ETPdb()
         db.connect('production')
 
     with HARTgetBallotType() as hgbt:

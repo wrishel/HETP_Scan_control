@@ -9,5 +9,6 @@ class QuSigs(QObject):
     scan_complete = pyqtSignal()        # scanning has completed a batch
     scan_error = pyqtSignal()           # scanning has discovered an error
     scan_update = pyqtSignal()          # scanning provides a mid-batch update
+    inspector_viewing = pyqtSignal(str) # what image is the ballot inspector viewing
 
 GLB.register(QuSigs(), 'signals')

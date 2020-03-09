@@ -107,7 +107,7 @@ class SysAdmin(QWidget):
             # todo: move some of the __init__ logic here.
         return True
 
-    def exit_check(self, departureType='continue'):
+    def exit_check(self):
         """Test for consistency among Admin settings. Return True if the operation should continue.
            i.e., no error or user response was "ignore"."""
 

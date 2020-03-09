@@ -110,22 +110,22 @@ class SysAdmin(QWidget):
            whether it is OK to enter."""
             # todo: move some of the __init__ logic here.
 
-        # activate the testing or production database
-        db_choice = GLB.config.get_or_else('Debugging', 'database', 'testing, None')
-        GLB.db.connect(db_choice)
-        max_img_num = GLB.config.get_or_else('Election', 'maximagenum', '999999', None)
-        # actual_max =  GLB.db.get_highest_image_num(max_img_num)
-
-
-        if GLB.config["Debugging"]['clear_db_on_start'] == 'True':
-            GLB.db.recreate_images()   # clear the database
-            GLB.config["Debugging"]['clear_db_on_start'] = 'False'
-            GLB.config.write()
-
-        GLB.db.fix_orphaned_rows()
+        # # activate the testing or production database
+        # db_choice = GLB.config.get_or_else('Debugging', 'database', 'testing, None')
+        # GLB.db.connect(db_choice)
+        # max_img_num = GLB.config.get_or_else('Election', 'maximagenum', '999999', None)
+        # # actual_max =  GLB.db.get_highest_image_num(max_img_num)
+        #
+        #
+        # if GLB.config["Debugging"]['clear_db_on_start'] == 'True':
+        #     GLB.db.recreate_images()   # clear the database
+        #     GLB.config["Debugging"]['clear_db_on_start'] = 'False'
+        #     GLB.config.write()
+        #
+        # GLB.db.fix_orphaned_rows()
         return True
 
-    def exit_check(self, departureType='continue'):
+    def exit_check(self):
         """Test for consistency among Admin settings. Return True if the operation should continue.
            i.e., no error or user response was "ignore"."""
 

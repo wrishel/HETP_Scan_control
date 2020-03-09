@@ -22,24 +22,22 @@
 #
 #    The class name of each panel must be unique.
 
-# TODO Make main window sizing dynamic which means making subwidgets dynamic
-# TODO Gray gap between green and yellow panels
-# TODO Make all buttons uniform color, such as rgb(226, 255, 255);
-# TODO: important: eliminate all references to auto backup
-
 import datetime
-import os
 import signal
+import shutil
 import subprocess
 import time
 
 print(datetime.datetime.now().isoformat(' '))   # for debugging
 
-# from dummy_panel import Dummy
+# The imports for singleton objects managed by GLB are ordered
+# according to their implicit precedent requirements.
+
 import GLB_globals
 import os
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 import sys
+from batch import Batch_status
 from scanner_hardware import Scan_HW_Control
 from dbase import ETPdb
 from transitioner  import Transitioner
@@ -103,6 +101,27 @@ class MainWindow(QtWidgets.QMainWindow):
             GLB.transitioner.set_current_panel('Sys Admin')
         else:
             GLB.transitioner.set_current_panel('Start Up')
+
+
+        # activate the testing or production database
+        db_choice = GLB.config.get_or_else('Debugging', 'database', 'testing, None')
+        GLB.db.connect(db_choice)
+
+        # for testing, clear images from the database and delete spoiled images
+        if GLB.config.get_bool_or("Debugging", 'clear_db_on_start', False):
+            GLB.db.recreate_images()   # clear the database
+            spoiled_path = GLB.config['Election']['path_to_spoiled_images']
+            for root, dirs, files in os.walk(spoiled_path):
+                for f in files:
+                    os.unlink(os.path.join(root, f))
+                for d in dirs:
+                    shutil.rmtree(os.path.join(root, d))
+
+            # GLB.config["Debugging"]['clear_db_on_start'] = 'False'
+            # GLB.config.write()
+
+
+        GLB.db.fix_orphaned_rows()
 
 
         # start parallel processes

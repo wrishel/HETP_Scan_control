@@ -44,9 +44,9 @@ class ETPdb():
             assert False, f'unknown database choice: "{db_choice}"'
 
         self.cnx = dbase.connect(**db_credentials)
-        if db_choice == 'testing' and \
-                    GLB.config.get_bool_or('Debugging', 'clear_db_on_start', False):
-                self.recreate_images()
+        # if db_choice == 'testing' and \
+        #             GLB.config.get_bool_or('Debugging', 'clear_db_on_start', False):
+        #         self.recreate_images()
 
 
     # -------------------------------  Server interactions  -------------------------------
@@ -216,15 +216,16 @@ class ETPdb():
             sql = f'''SELECT * FROM Images WHERE page_number IS NULL LIMIT {max}'''
         return self.retrieve_tuples(sql)
 
-    def get_highest_image_num(self, max_image_num):
+    def get_highest_image_num(self) -> int:
 
-        sql = f"""select max(image_number) from Images
-                  where image_number < {max_image_num}"""
+        sql = f"""select max(image_number) from Images"""
         try:
             x = self.retrieve(sql)
         except Exception as e:
             raise e
-        return x[0][0]
+        rv =  x[0][0]
+        if rv is None: rv = -1
+        return rv
 
     def get_page_report(self):
         """Get the data for the pages report."""

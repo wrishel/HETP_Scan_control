@@ -88,7 +88,7 @@ class ScanError3(QWidget):
 
     # validity checking before exiting the panel
 
-    def exit_check(self, departureType='continue'):
+    def exit_check(self):
         """Test for consistency among Admin settings. Return True if the operation should continue.
            e.g., no error or user response was "ignore"."""
 

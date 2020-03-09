@@ -30,10 +30,16 @@ class Scanconfig(configparser.ConfigParser):
         self.modified = True
 
     def get_list(self, section, key):
-        text = self[section][key]
-        list = text.split('|')
-        if list == ['']: list = list()
-        return list
+        text = self.get_or_else(section, key, '')
+        lst = text.split('|')
+        if lst == ['']: lsst = list()
+        return lst
+
+    def add_to_unique_list(self, item, section, key):
+        list = self.get_list(section, key)
+        if item not in list:
+            list.append(item)
+            self[section][key] = '|'.join(list)
 
     def get_dict(self, section, key):
         """return a dict where the text in the file looks like key:value, key: value, ...

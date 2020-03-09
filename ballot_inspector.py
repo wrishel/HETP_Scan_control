@@ -51,6 +51,7 @@ class Ballot_inspector(QtImageViewer):
 
         self.sides = deque([front, back])
         self.qtiv.zoom_all_out()
+        GLB.signals.inspector_viewing.emit(self.sides[0])
         self.qtiv.loadImageFromFile(self.sides[0])
 
     def respond_to_zoom_in_button(self):
@@ -63,7 +64,8 @@ class Ballot_inspector(QtImageViewer):
         if self.sides[1] is not None:
             self.sides.extendleft((self.sides.pop(),))
             self.qtiv.loadImageFromFile(self.sides[0])
-            self.qtiv.zoom_all_out()
+            GLB.signals.inspector_viewing.emit(self.sides[0])
+            # self.qtiv.zoom_all_out()
 
 
 if __name__ == '__main__':

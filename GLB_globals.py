@@ -36,6 +36,7 @@
 #
 # or perhase there is an introspective way to accomplish the type hint
 
+import re
 import sys
 import os
 
@@ -54,6 +55,8 @@ class etp_globals(object):
         if self._unlocked:
             self.ROOT_DIR = os.path.dirname(os.path.abspath(__file__))  # This is your Project Root
             self.path_to_etp_ini = 'etp.ini'
+            self.img_file_name_match = re.compile(r'(\d\d\d\d\d\d)\.jpe*g$', re.IGNORECASE)
+
             self.main_window = None
             self.XXXDBG = True              # debugging flag to skip forward over early screens
             if self.XXXDBG: print("XXXDBG IS ON", file=sys.stderr)

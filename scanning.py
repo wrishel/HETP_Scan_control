@@ -4,7 +4,7 @@
 import copy
 from etpconfig import Scanconfig
 import GLB_globals
-from scanner_hardware import Batch_status  # access through GLB
+from batch import Batch_status  # access through GLB
 from PyQt5 import uic
 from PyQt5.QtCore import QCoreApplication
 from PyQt5.QtWidgets import QWidget, QApplication
@@ -67,14 +67,9 @@ class Scanning(QWidget):
             # get next seq number from DB when simulating and from file system when live
             # todo: this should be refactored into scanner_hardware
             #
-            if GLB.config.get_bool_or('Scanning', 'simulating', False):
-                hsn = GLB.db.get_highest_image_num(GLB.config['Election']['maximagenum'])
-                self.next_seq_num = hsn if hsn is not None else 0
-            else:
-                self.next_seq_num = GLB.scanner.get_next_to_scan_new_batch()
-
-            bsb.next_seq_num_in_batch = self.next_seq_num
-            self.next_seq_numSB.setValue(int(self.next_seq_num))
+            next_seq_num = GLB.db.get_highest_image_num() + 1
+            bsb.next_seq_num_in_batch = next_seq_num
+            self.next_seq_numSB.setValue(int(next_seq_num))
 
         GLB.scanner.scan_a_batch()
         return True
@@ -86,7 +81,7 @@ class Scanning(QWidget):
 
     # ----------------------  exit_check  ----------------------
 
-    def exit_check(self, departureType='continue'):
+    def exit_check(self):
         """Test for consistency among Admin settings. Return True if the transition should continue.
            e.g., no error or user response was "ignore"."""
 

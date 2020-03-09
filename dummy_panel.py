@@ -39,7 +39,7 @@ class Dummy(QWidget):
 
     # screen and config consistency check
 
-    def exit_check(self, departureType='continue'):
+    def exit_check(self):
         return True # OK to proceed.
 
 if __name__== '__main__':

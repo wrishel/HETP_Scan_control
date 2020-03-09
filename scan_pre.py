@@ -95,30 +95,19 @@ class ScanPre(QWidget):
            whether it is OK to enter."""
 
         self.unusual_next_seq_num_ok = False
-
-        # we will accept an empty scanning section to deal with startups where
-        # the ini file does not exist. Todo: perhaps we should confirm this in sysadmin and
-        # remove the special case here.
-        try:
-            scanning_sect = GLB.config['Scanning'] # scanning section in config
-        except KeyError: scanning_sect = None
-
         self.elections_batch_numLE.setText('')
         GLB.batch_status.elections_batch_num = ''
-        if scanning_sect:
-            # get operator id list
-            self.opid_list = scanning_sect.get('operatoridlist', '').replace(' ', '').split('|')
-            self.opid = scanning_sect.get('operatorid', None)
-        self.next_seq_numSB.setValue(int(GLB.batch_status.get_next_to_scan_new_batch()))  # next sequence number
+        self.opid_list = GLB.config.get_list('Scanning', 'operatoridlist')
+        self.next_seq_numSB.setValue(GLB.scanner.get_next_image_number()) # next sequence number
         if GLB.XXXDBG:
             self.elections_batch_numLE.setText('X')
         return True
 
     # ----------------------- exit_check -----------------------
 
-    def exit_check(self, departureType='continue'):
-        """Test for consistency among Admin settings. Return True if the operation should continue.
-           e.g., no error or user response was "ignore"."""
+    def exit_check(self):
+        """Return True if the operation should continue. e.g., no error
+           or user response was 'ignore'. """
 
         # Check for any of the line edits being empty and give flak.
         # Put all the empties found into a single error message.
@@ -187,7 +176,7 @@ class ScanPre(QWidget):
 
                 self.unusual_next_seq_num_ok = True
 
-        # OK to turn write changes to conif and then return True
+        # Write changes to config file and then return True
 
         sc = GLB.config['Scanning']
         GLB.batch_status.operator_id = self.opid

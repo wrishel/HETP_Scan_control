@@ -7,7 +7,6 @@ import GLB_globals
 
 GLB = GLB_globals.get()
 
-
 def subpath_to_image(num):
     """Break up num into a directory/file name combo, without the file type suffix.
 
