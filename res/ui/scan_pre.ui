@@ -132,6 +132,17 @@ Number</string>
            <height>16777215</height>
           </size>
          </property>
+         <property name="font">
+          <font>
+           <italic>true</italic>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: rgb(255, 253, 236);</string>
+         </property>
+         <property name="frame">
+          <bool>true</bool>
+         </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
          </property>

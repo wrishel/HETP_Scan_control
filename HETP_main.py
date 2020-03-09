@@ -145,6 +145,20 @@ class MainWindow(QtWidgets.QMainWindow):
         if len(self.ext_processes):
                 time.sleep(2)  # give the processes some time to wrap up
 
+        rows = GLB.db.get_page_report()
+        field_widths = list([len(s) for s in rows[0]._fields])
+        s = '  ' + '  '.join(rows[0]._fields)
+        print(s)
+        for row in rows:
+            s = ''
+            for i in range(len(row)):
+                v = str(row[i])
+                field_pad = (field_widths[i] - len(v))
+                if field_pad <0: field_pad = 0
+                field = (' ' * field_pad) + v + '  '
+                s += field
+            print(s)
+
         QtCore.QCoreApplication.quit()
 
 

@@ -175,9 +175,10 @@ class ScanError2(QWidget):
            s: string      the path to the image being viewed."""
 
         snum = GLB.img_file_name_match.search(s)
-        self.img_numLBL.setText('%06d' % int(snum[1]))
-
-
+        if snum:
+            self.img_numLBL.setText('%06d' % int(snum[1]))
+        else:
+            self.img_numLBL.setText('------')
 
     # ---------------------------  entry check  ---------------------------
 

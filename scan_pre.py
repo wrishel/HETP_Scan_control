@@ -81,7 +81,7 @@ class ScanPre(QWidget):
 
     def elections_batch_num_changed(self):
         # todo: need to validate the new value
-            ...   # will get value directly from the widget at exit_check
+            ...
 
     def scanPB_pressed(self):
         """User has pressed the SCAN button."""

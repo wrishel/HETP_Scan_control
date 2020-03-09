@@ -105,8 +105,11 @@ class StartUp(QWidget):
            # todo: move some of the __init__ logic here.
 
         # populate the screen
-        s = 'DOUBLE SIDED.' if GLB.config['ballot']['doublesided'] else 'SINGLE SIDED.'
-        self.ballot_paramstLBL.setText(GLB.config['Election']['title'])
+
+        self.electionTitleLBL.setText(GLB.config['Election']['title'])
+        bdesc = 'DOUBLE SIDED.' if GLB.config['ballot']['doublesided'] else 'SINGLE SIDED.'
+        bdesc += f" {GLB.config['ballot']['length']} inches."
+        self.ballot_paramstLBL.setText(bdesc)
 
         # Match check box object names with the config file keys and set the value on the screen.
         for cb_name in self.check_boxes.keys():
