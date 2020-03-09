@@ -66,9 +66,9 @@ if __name__ == '__main__':
             fixes = [] # tuples of (precinct, page_number, image_number)
             for row in rows_to_fix:
                 image_num = row.image_number
-                print(f'yyy{image_num}')
+                # print(f'yyy{image_num}')
                 pth = fullpath_to_image(image_num)
-                print(f'zzz{pth}')
+                # print(f'zzz{pth}')
                 barcode = b2str(hgbt.getBallotType(pth))
                 if barcode is not None:
                     try:
@@ -85,6 +85,7 @@ if __name__ == '__main__':
                     precinct = 'UNKNOWN'
                     pagenum = 'UNK'
 
+            time.sleep(.05)     # avoid starving the UI
             tot_processed += len(fixes)
             if len(fixes) != 0:
                 print(pid, 'processed', tot_processed, datetime.datetime.now() - start_time)
